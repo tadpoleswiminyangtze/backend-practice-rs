@@ -3,6 +3,7 @@ mod db;
 mod dtos;
 mod error;
 mod models;
+mod utils;
 
 use crate::db::DBClient;
 use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
@@ -11,7 +12,7 @@ use axum::{Extension, Router};
 use config::Config;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::filter::LevelFilter;
 
 #[derive(Debug, Clone)]
@@ -45,9 +46,9 @@ async fn main() {
     };
 
     let cors = CorsLayer::new()
-        .allow_origin("*".parse::<HeaderValue>().unwrap())
+        .allow_origin(Any)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
-        .allow_credentials(true)
+        //.allow_credentials(true)
         .allow_methods([Method::GET, Method::POST, Method::PUT]);
 
     let db_client = DBClient::new(pool);
