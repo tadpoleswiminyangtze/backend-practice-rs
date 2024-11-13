@@ -1,9 +1,11 @@
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
-use axum::Json;
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Json,
+};
 use serde::{Deserialize, Serialize};
 use std::fmt;
-use std::fmt::Formatter;
+use std::fmt::Display;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ErrorResponse {
@@ -12,7 +14,7 @@ pub struct ErrorResponse {
 }
 
 impl fmt::Display for ErrorResponse {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }
@@ -32,6 +34,13 @@ pub enum ErrorMessage {
     PermissionDenied,
     UserNotAuthenticated,
 }
+
+impl Display for ErrorMessage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_str().to_owned())
+    }
+}
+
 impl ErrorMessage {
     fn to_str(&self) -> String {
         match self {
