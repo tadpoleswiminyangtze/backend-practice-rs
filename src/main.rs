@@ -2,6 +2,7 @@ mod config;
 mod db;
 mod dtos;
 mod error;
+mod handler;
 mod mail;
 mod middleware;
 mod models;
@@ -48,9 +49,9 @@ async fn main() {
     };
 
     let cors = CorsLayer::new()
-        .allow_origin(Any)
+        .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
-        //.allow_credentials(true)
+        .allow_credentials(true)
         .allow_methods([Method::GET, Method::POST, Method::PUT]);
 
     let db_client = DBClient::new(pool);
