@@ -1,10 +1,5 @@
-use crate::{
-    db::UserExt,
-    error::{ErrorMessage, HttpError},
-    models::{User, UserRole},
-    utils::token,
-    AppState,
-};
+use std::sync::Arc;
+
 use axum::{
     extract::Request,
     http::{header, StatusCode},
@@ -12,17 +7,25 @@ use axum::{
     response::IntoResponse,
     Extension,
 };
+
 use axum_extra::extract::cookie::CookieJar;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+use crate::{
+    db::UserExt,
+    error::{ErrorMessage, HttpError},
+    models::{User, UserRole},
+    utils::token,
+    AppState,
+};
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct JWTAuthMiddleware {
     pub user: User,
 }
 
 pub async fn auth(
-    cookie_jar: &CookieJar,
+    cookie_jar: CookieJar,
     Extension(app_state): Extension<Arc<AppState>>,
     mut req: Request,
     next: Next,
@@ -36,7 +39,7 @@ pub async fn auth(
                 .and_then(|auth_header| auth_header.to_str().ok())
                 .and_then(|auth_value| {
                     if auth_value.starts_with("Bearer ") {
-                        Some(auth_value[7..].to_string())
+                        Some(auth_value[7..].to_owned())
                     } else {
                         None
                     }
@@ -51,7 +54,7 @@ pub async fn auth(
         Err(_) => {
             return Err(HttpError::unauthorized(
                 ErrorMessage::InvalidToken.to_string(),
-            ))
+            ));
         }
     };
 

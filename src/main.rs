@@ -6,15 +6,18 @@ mod handler;
 mod mail;
 mod middleware;
 mod models;
+mod routes;
 mod utils;
 
 use crate::db::DBClient;
+use crate::routes::create_router;
 use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use axum::http::{HeaderValue, Method};
 use axum::{Extension, Router};
 use config::Config;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
+use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::filter::LevelFilter;
 
@@ -60,7 +63,7 @@ async fn main() {
         db_client,
     };
 
-    let app = Router::new().layer(Extension(app_state)).layer(cors);
+    let app = create_router(Arc::new(app_state.clone())).layer(cors.clone());
 
     println!(
         "{}",
